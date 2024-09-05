@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Stefano Cacciatore" />
+
+<meta name="date" content="2024-09-05" />
+
+<title>Module 3: Multivariate Regression</title>
+
+<script src="site_libs/header-attrs-2.28/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">wf</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Module 3: Multivariate Regression</h1>
+<h4 class="author">Stefano Cacciatore</h4>
+<h4 class="date">September 05, 2024</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2024-09-05
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>myproject/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20240905code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20240905)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20240905code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20240905)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongnoversioncontrol">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>Repository version:</strong> no
+version control </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongnoversioncontrol"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Tracking code development and connecting the code version to the
+results is critical for reproducibility. To start using Git, open the
+Terminal and type <code>git init</code> in your project directory.</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+This project is not being versioned with Git. To obtain the full
+reproducibility benefits of using workflowr, please see
+<code>?wflow_start</code>.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="unsupervised-learning-ul" class="section level3">
+<h3>Unsupervised Learning (UL)</h3>
+<p>UL is a type of ML that helps us discover patterns in data
+<strong>without</strong> needing predefined labels or much human
+guidance.</p>
+<p>Unlike supervised learning, which uses data with known outcomes, UL
+explores <strong>relationships within</strong> the data itself.</p>
+<p>A common approach to UL is <strong>clustering</strong> –&gt; where
+data points are grouped based on similarities. Methods include
+<strong>K-means clustering</strong>, <strong>Hierarchical
+clustering</strong> or <strong>Probabilistic clustering</strong>.</p>
+<ul>
+<li>For example, if we are analysing mRNA expression data, we use
+clustering to group genes with similar expression profiles.</li>
+</ul>
+<p>We also apply dimensionality reduction techniques:
+<strong>PCA</strong> (Principal Component Analysis) &amp;
+<strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) to
+<strong>simplify</strong> and <strong>visualize</strong> complex
+data.</p>
+<ul>
+<li>This allows us to uncover hidden structures and gain insights into
+the genetic basis of various conditions.</li>
+</ul>
+<p>Models trained using <strong>UNLABELLED</strong> data</p>
+<ul>
+<li><p>Only <strong>INPUT</strong> provided</p></li>
+<li><p>Discovers <strong>patterns</strong>, <strong>groupings</strong>,
+or <strong>relationships</strong> within data</p></li>
+</ul>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>
+Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    filter, lag</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    intersect, setdiff, setequal, union</code></pre>
+<div id="step-1-prepare-data" class="section level4">
+<h4>Step 1: Prepare Data</h4>
+<p>We need to divide df into an input matrix of features and an output
+vector set into a training set and a test set.</p>
+<pre class="r"><code># Read in Heart Failure Data:
+qc1 &lt;- read.csv(&quot;data/heart_failure_clinical_records_dataset.csv&quot;)
+head(qc1)</code></pre>
+<pre><code>  age anaemia creatinine_phosphokinase diabetes ejection_fraction
+1  75       0                      582        0                20
+2  55       0                     7861        0                38
+3  65       0                      146        0                20
+4  50       1                      111        0                20
+5  65       1                      160        1                20
+6  90       1                       47        0                40
+  high_blood_pressure platelets serum_creatinine serum_sodium sex smoking time
+1                   1    265000              1.9          130   1       0    4
+2                   0    263358              1.1          136   1       0    6
+3                   0    162000              1.3          129   1       1    7
+4                   0    210000              1.9          137   1       0    7
+5                   0    327000              2.7          116   0       0    8
+6                   1    204000              2.1          132   1       1    8
+  DEATH_EVENT
+1           1
+2           1
+3           1
+4           1
+5           1
+6           1</code></pre>
+</div>
+<div id="step-2-data-filtering-and-reduction" class="section level4">
+<h4>Step 2: Data Filtering and Reduction</h4>
+<p>To enhance the quality of our clustering, we will only focus on
+variables that show significant variation, as they provide more
+meaningful insights for grouping.</p>
+<p>This step involves filtering out variables with <strong><em>low
+variance</em></strong> and any <strong><em>missing values</em></strong>
+to ensure our data is clean and robust for analysis.</p>
+<p>This step is crucial for preprocessing data before it’s used for
+downstream analysis, such as clustering or visualization.</p>
+<p>The aim is to filter out variables that are <strong><em>unlikely to
+be informative</em></strong> for <strong><em>distinguishing between
+different samples</em></strong>.</p>
+<p>Let’s break down this step by step, explaining the purpose of each
+part and adding more comments for clarity.</p>
+<pre class="r"><code># Select the variables for analysis today. 
+qc2 &lt;- qc1 %&gt;%
+  select(age, platelets, time, serum_creatinine, DEATH_EVENT)
+
+# Analyze structure and attributes:
+str(qc2)</code></pre>
+<pre><code>&#39;data.frame&#39;:   299 obs. of  5 variables:
+ $ age             : num  75 55 65 50 65 90 75 60 65 80 ...
+ $ platelets       : num  265000 263358 162000 210000 327000 ...
+ $ time            : int  4 6 7 7 8 8 10 10 10 10 ...
+ $ serum_creatinine: num  1.9 1.1 1.3 1.9 2.7 2.1 1.2 1.1 1.5 9.4 ...
+ $ DEATH_EVENT     : int  1 1 1 1 1 1 1 1 1 1 ...</code></pre>
+<pre class="r"><code>summary(qc2)</code></pre>
+<pre><code>      age          platelets           time       serum_creatinine
+ Min.   :40.00   Min.   : 25100   Min.   :  4.0   Min.   :0.500   
+ 1st Qu.:51.00   1st Qu.:212500   1st Qu.: 73.0   1st Qu.:0.900   
+ Median :60.00   Median :262000   Median :115.0   Median :1.100   
+ Mean   :60.83   Mean   :263358   Mean   :130.3   Mean   :1.394   
+ 3rd Qu.:70.00   3rd Qu.:303500   3rd Qu.:203.0   3rd Qu.:1.400   
+ Max.   :95.00   Max.   :850000   Max.   :285.0   Max.   :9.400   
+  DEATH_EVENT    
+ Min.   :0.0000  
+ 1st Qu.:0.0000  
+ Median :0.0000  
+ Mean   :0.3211  
+ 3rd Qu.:1.0000  
+ Max.   :1.0000  </code></pre>
+<pre class="r"><code>head(qc2)</code></pre>
+<pre><code>  age platelets time serum_creatinine DEATH_EVENT
+1  75    265000    4              1.9           1
+2  55    263358    6              1.1           1
+3  65    162000    7              1.3           1
+4  50    210000    7              1.9           1
+5  65    327000    8              2.7           1
+6  90    204000    8              2.1           1</code></pre>
+</div>
+<div id="determine-optimal-k" class="section level4">
+<h4>Determine optimal K:</h4>
+<pre class="r"><code># Load necessary libraries
+library(cluster)   # For silhouette score calculation
+library(stats)     # For k-means clustering
+
+# Step 1: Normalize the data (excluding the &#39;DEATH_EVENT&#39; column as it might be the outcome)
+# Assuming qc1 contains both the features and labels
+data &lt;- qc1[, -which(names(qc1) == &quot;DEATH_EVENT&quot;)]  # Remove DEATH_EVENT column if it&#39;s an outcome variable
+data_scaled &lt;- scale(data)  # Normalize the features
+
+# Step 2: Define range of clusters to evaluate
+range_n_clusters &lt;- 2:8
+silhouette_avg &lt;- c()  # Store silhouette scores
+
+# Step 3: Iterate over the range of clusters and calculate silhouette scores
+for (n_clusters in range_n_clusters) {
+  # Perform k-means clustering
+  set.seed(10)  # Set random seed for reproducibility
+  kmeans_model &lt;- kmeans(data_scaled, centers = n_clusters)
+  
+  # Calculate silhouette score
+  cluster_labels &lt;- kmeans_model$cluster
+  sil_score &lt;- silhouette(cluster_labels, dist(data_scaled))  # Calculate silhouette score
+  
+  # Average silhouette score
+  silhouette_avg &lt;- c(silhouette_avg, mean(sil_score[, 3]))  # Column 3 contains the silhouette widths
+}
+
+# Step 4: Find the optimal number of clusters based on the highest silhouette score
+optimal_n_clusters &lt;- range_n_clusters[which.max(silhouette_avg)]
+
+# Print the optimal number of clusters
+cat(&quot;Optimal number of clusters based on silhouette score:&quot;, optimal_n_clusters, &quot;\n&quot;)</code></pre>
+<pre><code>Optimal number of clusters based on silhouette score: 2 </code></pre>
+<pre class="r"><code># Optional: View silhouette scores for each number of clusters
+silhouette_avg</code></pre>
+<pre><code>[1] 0.11785126 0.10740631 0.09911207 0.10197576 0.10127384 0.09696994 0.10381980</code></pre>
+</div>
+<div id="perform-k-means" class="section level4">
+<h4>Perform K-means:</h4>
+<pre class="r"><code># Load necessary libraries
+library(cluster)   # For silhouette score
+library(ggplot2)   # For visualization (optional)
+
+# Step 1: Prepare the data (excluding &#39;DEATH_EVENT&#39;)
+data &lt;- qc1[, -which(names(qc1) == &quot;DEATH_EVENT&quot;)]  # Remove &#39;DEATH_EVENT&#39; as this is our outcome. 
+data_scaled &lt;- scale(data)  # Normalize the features
+
+# Step 2: Perform K-means clustering with k = 2
+set.seed(10)  # For reproducibility
+kmeans_model &lt;- kmeans(data_scaled, centers = 2)
+
+# Step 3: Get the cluster assignments
+cluster_labels &lt;- kmeans_model$cluster
+
+# Step 4: Visualize clustering (Optional, using first two principal components)
+pca_res &lt;- prcomp(data_scaled, scale = TRUE)
+pca_data &lt;- data.frame(pca_res$x[, 1:2], Cluster = factor(cluster_labels))
+
+ggplot(pca_data, aes(PC1, PC2, color = Cluster)) + 
+  geom_point(size = 3) + 
+  ggtitle(&quot;K-means Clustering (k=2)&quot;) + 
+  theme_minimal()</code></pre>
+<p><img src="figure/M5_UL.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Step 5: Evaluate the silhouette score for k = 2
+sil_score &lt;- silhouette(cluster_labels, dist(data_scaled))
+mean_silhouette &lt;- mean(sil_score[, 3])  # Mean silhouette score
+cat(&quot;Mean silhouette score for k=2:&quot;, mean_silhouette, &quot;\n&quot;)</code></pre>
+<pre><code>Mean silhouette score for k=2: 0.1178513 </code></pre>
+<pre class="r"><code># Optional: View the K-means model results
+print(kmeans_model)</code></pre>
+<pre><code>K-means clustering with 2 clusters of sizes 107, 192
+
+Cluster means:
+          age     anaemia creatinine_phosphokinase   diabetes ejection_fraction
+1 -0.09629548  0.12878057              -0.11383868  0.2320537         0.2322096
+2  0.05366467 -0.07176834               0.06344135 -0.1293216        -0.1294085
+  high_blood_pressure  platelets serum_creatinine serum_sodium        sex
+1          0.16467263  0.1813572      -0.01820463   0.04253077 -1.3179040
+2         -0.09177068 -0.1010689       0.01014529  -0.02370204  0.7344569
+     smoking        time
+1 -0.6065961  0.02132365
+2  0.3380510 -0.01188349
+
+Clustering vector:
+  [1] 2 2 2 2 1 2 2 2 1 2 2 2 2 2 1 2 2 2 1 1 1 1 2 2 1 2 1 2 2 2 2 2 1 1 2 2 2
+ [38] 1 2 1 2 1 2 2 1 2 2 2 2 1 2 1 1 1 1 2 2 2 2 2 2 1 2 2 1 2 1 2 1 2 2 2 2 2
+ [75] 2 2 1 2 2 1 1 2 1 2 1 2 2 1 2 2 2 2 1 2 1 2 2 1 1 1 2 2 2 2 1 1 2 2 2 2 2
+[112] 2 2 1 2 1 1 1 1 1 2 1 1 1 2 1 1 1 2 2 2 2 1 2 2 2 1 2 1 2 2 1 1 1 2 2 2 2
+[149] 2 2 1 2 2 2 1 2 1 2 2 2 2 2 2 1 2 1 2 2 1 1 2 2 2 2 2 2 2 1 2 2 2 2 2 2 2
+[186] 2 1 1 1 1 2 1 2 2 2 2 1 1 1 2 2 1 2 2 2 1 1 2 1 1 2 2 2 1 2 2 1 1 2 1 2 2
+[223] 2 2 2 1 2 2 1 1 1 2 2 2 2 2 2 2 1 2 1 2 2 1 2 2 2 2 2 1 1 1 2 1 2 2 1 2 2
+[260] 2 2 1 2 1 2 2 2 2 1 2 2 1 1 2 2 1 1 2 1 1 2 2 2 2 2 2 2 1 1 1 1 2 2 2 2 1
+[297] 1 2 2
+
+Within cluster sum of squares by cluster:
+[1] 1090.896 2099.518
+ (between_SS / total_SS =  10.8 %)
+
+Available components:
+
+[1] &quot;cluster&quot;      &quot;centers&quot;      &quot;totss&quot;        &quot;withinss&quot;     &quot;tot.withinss&quot;
+[6] &quot;betweenss&quot;    &quot;size&quot;         &quot;iter&quot;         &quot;ifault&quot;      </code></pre>
+</div>
+<div
+id="step-x-visualisation-of-clustering-using-pca-and-t-sne-visualization"
+class="section level4">
+<h4>Step X: Visualisation of Clustering using PCA and t-SNE
+Visualization:</h4>
+<pre class="r"><code># Load necessary libraries
+library(ggplot2)     # For plotting
+library(Rtsne)       # For t-SNE
+
+# Step 1: PCA for visualization
+pca_res &lt;- prcomp(data_scaled, scale. = TRUE)  # Perform PCA
+pca_data &lt;- data.frame(PC1 = pca_res$x[, 1], PC2 = pca_res$x[, 2], Cluster = factor(cluster_labels))
+
+# Plot PCA results
+ggplot(pca_data, aes(x = PC1, y = PC2, color = Cluster)) +
+  geom_point(size = 3) +
+  ggtitle(&#39;PCA of Data&#39;) +
+  xlab(&#39;Principal Component 1&#39;) +
+  ylab(&#39;Principal Component 2&#39;) +
+  theme_minimal()</code></pre>
+<p><img src="figure/M5_UL.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Step 2: t-SNE for visualization
+set.seed(0)  # Set seed for reproducibility
+tsne_res &lt;- Rtsne(data_scaled, dims = 2, perplexity = 30, verbose = TRUE, max_iter = 1000)</code></pre>
+<pre><code>Performing PCA
+Read the 299 x 12 data matrix successfully!
+Using no_dims = 2, perplexity = 30.000000, and theta = 0.500000
+Computing input similarities...
+Building tree...
+Done in 0.02 seconds (sparsity = 0.383642)!
+Learning embedding...
+Iteration 50: error is 56.228708 (50 iterations in 0.04 seconds)
+Iteration 100: error is 55.842532 (50 iterations in 0.05 seconds)
+Iteration 150: error is 55.799354 (50 iterations in 0.04 seconds)
+Iteration 200: error is 55.784704 (50 iterations in 0.04 seconds)
+Iteration 250: error is 55.857021 (50 iterations in 0.04 seconds)
+Iteration 300: error is 0.970744 (50 iterations in 0.03 seconds)
+Iteration 350: error is 0.914683 (50 iterations in 0.03 seconds)
+Iteration 400: error is 0.894717 (50 iterations in 0.03 seconds)
+Iteration 450: error is 0.879408 (50 iterations in 0.03 seconds)
+Iteration 500: error is 0.860311 (50 iterations in 0.03 seconds)
+Iteration 550: error is 0.853964 (50 iterations in 0.03 seconds)
+Iteration 600: error is 0.851798 (50 iterations in 0.03 seconds)
+Iteration 650: error is 0.850981 (50 iterations in 0.03 seconds)
+Iteration 700: error is 0.849842 (50 iterations in 0.03 seconds)
+Iteration 750: error is 0.845871 (50 iterations in 0.03 seconds)
+Iteration 800: error is 0.846194 (50 iterations in 0.03 seconds)
+Iteration 850: error is 0.846552 (50 iterations in 0.03 seconds)
+Iteration 900: error is 0.846274 (50 iterations in 0.03 seconds)
+Iteration 950: error is 0.845975 (50 iterations in 0.03 seconds)
+Iteration 1000: error is 0.845975 (50 iterations in 0.03 seconds)
+Fitting performed in 0.63 seconds.</code></pre>
+<pre class="r"><code># Prepare t-SNE data for plotting
+tsne_data &lt;- data.frame(Dim1 = tsne_res$Y[, 1], Dim2 = tsne_res$Y[, 2], Cluster = factor(cluster_labels))
+
+# Plot t-SNE results
+ggplot(tsne_data, aes(x = Dim1, y = Dim2, color = Cluster)) +
+  geom_point(size = 3) +
+  ggtitle(&#39;t-SNE of Data&#39;) +
+  xlab(&#39;Dimension 1&#39;) +
+  ylab(&#39;Dimension 2&#39;) +
+  theme_minimal()</code></pre>
+<p><img src="figure/M5_UL.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.4.1 (2024-06-14)
+Platform: aarch64-apple-darwin20
+Running under: macOS Sonoma 14.6.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+time zone: Africa/Johannesburg
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] Rtsne_0.17    ggplot2_3.5.1 cluster_2.1.6 dplyr_1.1.4  
+
+loaded via a namespace (and not attached):
+ [1] gtable_0.3.5      jsonlite_1.8.8    highr_0.11        compiler_4.4.1   
+ [5] promises_1.3.0    tidyselect_1.2.1  Rcpp_1.0.13       stringr_1.5.1    
+ [9] git2r_0.33.0      later_1.3.2       jquerylib_0.1.4   scales_1.3.0     
+[13] yaml_2.3.10       fastmap_1.2.0     R6_2.5.1          labeling_0.4.3   
+[17] generics_0.1.3    workflowr_1.7.1   knitr_1.48        tibble_3.2.1     
+[21] munsell_0.5.1     rprojroot_2.0.4   bslib_0.8.0       pillar_1.9.0     
+[25] rlang_1.1.4       utf8_1.2.4        cachem_1.1.0      stringi_1.8.4    
+[29] httpuv_1.6.15     xfun_0.47         fs_1.6.4          sass_0.4.9       
+[33] cli_3.6.3         withr_3.0.1       magrittr_2.0.3    grid_4.4.1       
+[37] digest_0.6.37     rstudioapi_0.16.0 lifecycle_1.0.4   vctrs_0.6.5      
+[41] evaluate_0.24.0   glue_1.7.0        farver_2.1.2      colorspace_2.1-1 
+[45] fansi_1.0.6       rmarkdown_2.28    tools_4.4.1       pkgconfig_2.0.3  
+[49] htmltools_0.5.8.1</code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
